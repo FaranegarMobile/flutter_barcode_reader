@@ -75,6 +75,7 @@ public class CameraViewManager2 {
     public CameraView2 createViewInstance(Context reactContext, BarcodeScanner2.ResultHandler resultHandler) {
         CameraViewManager2.reactContext = reactContext;
         this.resultHandler = resultHandler;
+        System.out.println("Faranegar Context: " + reactContext);
         return new CameraView2(reactContext);
     }
 

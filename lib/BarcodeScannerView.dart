@@ -59,10 +59,12 @@ class _BarcodeScannerViewState extends State<BarcodeScannerView>
         print("Flutter Life Cycle: paused");
         controller.pauseCamera();
         break;
-      case AppLifecycleState.suspending:
-        print("Flutter Life Cycle: suspending");
-        // Handle this case
+      default:
         break;
+//      case AppLifecycleState.suspending:
+//        print("Flutter Life Cycle: suspending");
+//        // Handle this case
+//        break;
     }
   }
 
@@ -89,9 +91,9 @@ class BarcodeController {
   final MethodChannel _channel;
 
   Future<dynamic> myUtilsHandler(MethodCall methodCall) async {
-    print("Flutter barcode read" + methodCall.arguments);
+    print("Flutter barcode read: " + methodCall.arguments);
     if(onBarcodeRead != null)
-      onBarcodeRead();
+      onBarcodeRead(methodCall.arguments);
     return null;
   }
 
