@@ -9,15 +9,22 @@ import 'package:flutter/services.dart';
 class BarcodeScannerView extends StatefulWidget {
 //  MainModel model;
   Function onBarcodeRead;
-  BarcodeScannerView({
-    Key key,
-    this.onBarcodeRead
-  }) : super(key: key);
+
+  _BarcodeScannerViewState viewState;
+
+  BarcodeScannerView({Key key, this.onBarcodeRead}) : super(key: key);
 
 //  TextViewCreatedCallback onWidgetCreated;
 
+  Future<String> takePicture() {
+    return viewState.controller.takePicture();
+  }
+
   @override
-  State<StatefulWidget> createState() => _BarcodeScannerViewState();
+  State<StatefulWidget> createState() {
+    viewState = _BarcodeScannerViewState();
+    return viewState;
+  }
 }
 
 class _BarcodeScannerViewState extends State<BarcodeScannerView>
@@ -37,6 +44,11 @@ class _BarcodeScannerViewState extends State<BarcodeScannerView>
         viewType: 'com.faranegar/androidbarcodescanner',
         onPlatformViewCreated: _onPlatformViewCreated,
       );
+    } else {
+      return UiKitView(
+        viewType: 'com.faranegar/androidbarcodescanner',
+        onPlatformViewCreated: _onPlatformViewCreated,
+      );
     }
     return Text(
         '$defaultTargetPlatform is not yet supported by the text_view plugin');
@@ -48,7 +60,7 @@ class _BarcodeScannerViewState extends State<BarcodeScannerView>
       case AppLifecycleState.resumed:
         // Handle this case
         print("Flutter Life Cycle: resumed");
-        //controller.initCamera();
+        controller.resumeCamera();
         break;
       case AppLifecycleState.inactive:
         // Handle this case
@@ -75,16 +87,19 @@ class _BarcodeScannerViewState extends State<BarcodeScannerView>
   }
 
   void _onPlatformViewCreated(int id) {
-    this.controller = new BarcodeController._(id, context, widget.onBarcodeRead);
+    this.controller =
+        new BarcodeController._(id, context, widget.onBarcodeRead);
+    this.controller.initCamera();
 //    widget.onWidgetCreated(controller);
 
-  controller.initCamera();
+    //controller.initCamera();
   }
 }
 
 class BarcodeController {
   BuildContext context;
   Function onBarcodeRead;
+
   BarcodeController._(int id, this.context, this.onBarcodeRead)
       : _channel = new MethodChannel('com.faranegar/androidbarcodescanner_$id');
 
@@ -92,18 +107,20 @@ class BarcodeController {
 
   Future<dynamic> myUtilsHandler(MethodCall methodCall) async {
     print("Flutter barcode read: " + methodCall.arguments);
-    if(onBarcodeRead != null)
-      onBarcodeRead(methodCall.arguments);
+    if (onBarcodeRead != null) onBarcodeRead(methodCall.arguments);
     return null;
   }
 
-  Future<void> initCamera() async {
+  void initCamera() async {
     _channel.setMethodCallHandler(myUtilsHandler);
-    return _channel.invokeMethod('initCamera');
+    print("Flutter camera init successfully");
+  }
+
+  Future<String> takePicture() async {
+     return _channel.invokeMethod('takePicture');
   }
 
   Future<void> resumeCamera() async {
-    _channel.setMethodCallHandler(myUtilsHandler);
     return _channel.invokeMethod('resumeCamera');
   }
 
@@ -111,4 +128,6 @@ class BarcodeController {
     return _channel.invokeMethod('pauseCamera');
 //    return Future(Future(computation);
   }
+
+
 }

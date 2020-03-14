@@ -4,18 +4,17 @@ import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.hardware.Camera;
+import android.util.Base64;
 import android.view.View;
 
-import com.google.zxing.BarcodeFormat;
 import com.google.zxing.Result;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import helperwix.BarcodeScanner2;
 import helperwix.CameraView2;
 import helperwix.CameraViewManager2;
-import io.flutter.app.FlutterActivity;
 import io.flutter.plugin.common.BinaryMessenger;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
@@ -23,7 +22,7 @@ import io.flutter.plugin.platform.PlatformView;
 
 import static io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 
-class AndroidBarcodeScannerView implements PlatformView, MethodCallHandler {
+class AndroidBarcodeScannerView implements PlatformView, MethodCallHandler, Camera.PictureCallback {
     private final CameraView2 view;
     private final CameraViewManager2 cameraManager;
     private final MethodChannel methodChannel;
@@ -36,6 +35,7 @@ class AndroidBarcodeScannerView implements PlatformView, MethodCallHandler {
             methodChannel.invokeMethod("barcodeRead", intent.getExtras().getString("Barcode"));
         }
     };
+    private MethodChannel.Result result;
 
 
     AndroidBarcodeScannerView(Activity activity, BinaryMessenger messenger, int id) {
@@ -49,10 +49,6 @@ class AndroidBarcodeScannerView implements PlatformView, MethodCallHandler {
 
         methodChannel = new MethodChannel(messenger, "com.faranegar/androidbarcodescanner_" + id);
         methodChannel.setMethodCallHandler(this);
-
-
-
-
     }
 
 
@@ -74,22 +70,27 @@ class AndroidBarcodeScannerView implements PlatformView, MethodCallHandler {
             case "resumeCamera":
                 resumeCamera(methodCall, result);
                 break;
+            case "takePicture":
+                takePicture(methodCall, result);
+                break;
             default:
                 result.notImplemented();
         }
 
     }
 
+    private void takePicture(MethodCall methodCall, MethodChannel.Result result) {
+        this.result = result;
+        view.takePicture(this);
+    }
+
     private void resumeCamera(MethodCall methodCall, MethodChannel.Result result) {
 //        view.resumeScanning();
+        CameraViewManager2.setCameraView(view);
     }
 
     private void pauseCamera(MethodCall methodCall, MethodChannel.Result result) {
-//        view.pauseScanning();
-//        fullScannerFragment.pauseScanning();
-//        FragmentTransaction transaction = activity.getFragmentManager().beginTransaction();
-//        transaction.remove(fullScannerFragment);
-//        transaction.commitAllowingStateLoss();
+        CameraViewManager2.removeCameraView();
         result.success(null);
     }
 
@@ -138,12 +139,9 @@ class AndroidBarcodeScannerView implements PlatformView, MethodCallHandler {
 //        view.startCamera();
 
 
-
-
         result.success(null);
 
     }
-
 
 
     @Override
@@ -151,4 +149,8 @@ class AndroidBarcodeScannerView implements PlatformView, MethodCallHandler {
     }
 
 
+    @Override
+    public void onPictureTaken(byte[] data, Camera camera) {
+        result.success(Base64.encodeToString(data, Base64.DEFAULT));
+    }
 }

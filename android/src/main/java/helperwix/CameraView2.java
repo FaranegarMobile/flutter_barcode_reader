@@ -3,6 +3,7 @@ package helperwix;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Rect;
+import android.hardware.Camera;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
@@ -17,8 +18,9 @@ import camerakit.camera.barcode.BarcodeFrame;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 
 public class CameraView2 extends FrameLayout implements SurfaceHolder.Callback {
-    private SurfaceView surface;
 
+    //Version 6
+    private SurfaceView surface;
     private boolean showFrame;
     private Rect frameRect;
     private BarcodeFrame barcodeFrame;
@@ -47,7 +49,7 @@ public class CameraView2 extends FrameLayout implements SurfaceHolder.Callback {
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
-        CameraViewManager2.setCameraView(this);
+//        CameraViewManager2.setCameraView(this);
     }
 
     @Override
@@ -140,5 +142,10 @@ public class CameraView2 extends FrameLayout implements SurfaceHolder.Callback {
      */
     public void setSurfaceBgColor(@ColorInt int color) {
         surface.setBackgroundColor(color);
+    }
+
+    public void takePicture(Camera.PictureCallback pictureCallback) {
+
+        CameraViewManager2.getCamera().takePicture(null, null, pictureCallback);
     }
 }

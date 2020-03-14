@@ -79,7 +79,7 @@ public class CameraViewManager2 {
         return new CameraView2(reactContext);
     }
 
-    static void setCameraView(CameraView2 cameraView) {
+    public static void setCameraView(CameraView2 cameraView) {
         if (!cameraViews.isEmpty() && cameraViews.peek() == cameraView) return;
         cameraView.setShowFrame(true);
         cameraView.showFrame();
@@ -185,7 +185,7 @@ public class CameraViewManager2 {
         }).start();
     }
 
-    static void removeCameraView() {
+    public static void removeCameraView() {
         if (!cameraViews.isEmpty()) {
             cameraViews.pop();
         }
